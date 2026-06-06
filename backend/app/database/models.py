@@ -17,11 +17,23 @@ from sqlalchemy import (
     String,
     Text,
     text,
+    JSON,
+    Uuid as SqlaUuid,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
+from app.config import settings
 from app.database.db import Base
+
+is_postgres = settings.DATABASE_URL.startswith("postgresql") if settings.DATABASE_URL else False
+
+if is_postgres:
+    from sqlalchemy.dialects.postgresql import JSONB, UUID
+    UUID_TYPE = UUID(as_uuid=True)
+    JSON_TYPE = JSONB
+else:
+    UUID_TYPE = SqlaUuid(as_uuid=True)
+    JSON_TYPE = JSON
 
 
 def _utcnow() -> datetime:
@@ -40,10 +52,10 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(
-        UUID(as_uuid=True),
+        UUID_TYPE,
         primary_key=True,
         default=uuid.uuid4,
-        server_default=text("gen_random_uuid()"),
+        server_default=text("gen_random_uuid()") if is_postgres else None,
     )
     email = Column(String(255), unique=True, nullable=False, index=True)
     full_name = Column(String(255), nullable=False, server_default="")
@@ -52,13 +64,13 @@ class User(Base):
         DateTime(timezone=True),
         nullable=False,
         default=_utcnow,
-        server_default=text("now()"),
+        server_default=text("now()") if is_postgres else text("(CURRENT_TIMESTAMP)"),
     )
     updated_at = Column(
         DateTime(timezone=True),
         nullable=False,
         default=_utcnow,
-        server_default=text("now()"),
+        server_default=text("now()") if is_postgres else text("(CURRENT_TIMESTAMP)"),
         onupdate=_utcnow,
     )
 
@@ -90,13 +102,13 @@ class Workflow(Base):
     __tablename__ = "workflows"
 
     id = Column(
-        UUID(as_uuid=True),
+        UUID_TYPE,
         primary_key=True,
         default=uuid.uuid4,
-        server_default=text("gen_random_uuid()"),
+        server_default=text("gen_random_uuid()") if is_postgres else None,
     )
     user_id = Column(
-        UUID(as_uuid=True),
+        UUID_TYPE,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
@@ -104,19 +116,19 @@ class Workflow(Base):
     domain = Column(String(100), nullable=False, server_default="General")
     complexity = Column(String(10), nullable=False, server_default="Medium")
     estimated_time = Column(String(50), nullable=False, server_default="")
-    response_data = Column(JSONB, nullable=False)
+    response_data = Column(JSON_TYPE, nullable=False)
 
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
         default=_utcnow,
-        server_default=text("now()"),
+        server_default=text("now()") if is_postgres else text("(CURRENT_TIMESTAMP)"),
     )
     updated_at = Column(
         DateTime(timezone=True),
         nullable=False,
         default=_utcnow,
-        server_default=text("now()"),
+        server_default=text("now()") if is_postgres else text("(CURRENT_TIMESTAMP)"),
         onupdate=_utcnow,
     )
     deleted_at = Column(

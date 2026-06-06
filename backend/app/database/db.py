@@ -42,19 +42,26 @@ def _get_engine():
                 "DATABASE_URL is not configured. "
                 "Set it in .env or as an environment variable."
             )
+        is_sqlite = settings.DATABASE_URL.startswith("sqlite")
+        engine_kwargs = {
+            "echo": settings.DEBUG,
+        }
+        if not is_sqlite:
+            engine_kwargs.update({
+                "pool_pre_ping": True,
+                "pool_size": 5,
+                "max_overflow": 10,
+            })
         _engine = create_async_engine(
             settings.DATABASE_URL,
-            echo=settings.DEBUG,
-            pool_pre_ping=True,
-            pool_size=5,
-            max_overflow=10,
+            **engine_kwargs
         )
         _async_session_factory = sessionmaker(
             _engine,
             class_=AsyncSession,
             expire_on_commit=False,
         )
-        logger.info("Database engine created (pool_size=5, max_overflow=10)")
+        logger.info("Database engine created (is_sqlite=%s)", is_sqlite)
     return _engine
 
 

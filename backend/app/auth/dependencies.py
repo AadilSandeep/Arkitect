@@ -55,12 +55,16 @@ async def get_current_user(
 
     # --- Verify JWT ---
     try:
-        payload = jwt.decode(
-            token,
-            settings.SUPABASE_JWT_SECRET,
-            algorithms=["HS256"],
-            audience="authenticated",
-        )
+        if not settings.SUPABASE_JWT_SECRET and settings.ENVIRONMENT == "development":
+            logger.warning("SUPABASE_JWT_SECRET not set — decoding JWT without signature verification (dev bypass)")
+            payload = jwt.get_unverified_claims(token)
+        else:
+            payload = jwt.decode(
+                token,
+                settings.SUPABASE_JWT_SECRET,
+                algorithms=["HS256"],
+                audience="authenticated",
+            )
     except JWTError as exc:
         logger.warning("JWT verification failed: %s", exc)
         raise HTTPException(

@@ -59,12 +59,16 @@ async def sync_user(
 
     # Decode the JWT to get user info
     try:
-        payload = jwt.decode(
-            credentials.credentials,
-            settings.SUPABASE_JWT_SECRET,
-            algorithms=["HS256"],
-            audience="authenticated",
-        )
+        if not settings.SUPABASE_JWT_SECRET and settings.ENVIRONMENT == "development":
+            logger.warning("SUPABASE_JWT_SECRET not set — decoding JWT without signature verification (dev bypass)")
+            payload = jwt.get_unverified_claims(credentials.credentials)
+        else:
+            payload = jwt.decode(
+                credentials.credentials,
+                settings.SUPABASE_JWT_SECRET,
+                algorithms=["HS256"],
+                audience="authenticated",
+            )
     except JWTError as exc:
         logger.warning("JWT verification failed during sync: %s", exc)
         raise HTTPException(
