@@ -69,7 +69,7 @@ If Gemini is unavailable or rate-limited, Arkitect automatically falls back to a
 
 ---
 
-## 🏗 Architecture
+## 🏗 Architecture 
 
 ```text
 User
