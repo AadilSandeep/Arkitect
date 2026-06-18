@@ -25,11 +25,11 @@ The platform combines AI-generated planning with a deterministic fallback pipeli
 ### Landing Page
 ![Landing page](docs/landing.jpg)
 
-### Workflow Generation
+### LOGIN
+![Login Screen](docs/login.jpg)
 
 ### Generated Workflow
-
-### Workflow History
+![Workflow](docs/workflow.jpg)
 
 ---
 
