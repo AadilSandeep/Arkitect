@@ -292,10 +292,11 @@ pytest
 
 ## 👨‍💻 Authors
 
-**Alfin Muhammed S**
+## 👨‍💻 Authors
 
-GitHub:
-https://github.com/AlfinMuhammedS
+- Alfin Muhammed S <https://github.com/AlfinMuhammedS>
+- Aadil Sandeep <https://github.com/Aadilsandeep>
+
 
 ---
 
